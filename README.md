@@ -30,7 +30,7 @@ Este proyecto es un web scraper que obtiene los pisos añadidos en los últimos 
     python src/main.py
     ```
 
-2. El script abrirá un navegador (si `headless` está configurado como `False`), navegará a la URL especificada, extraerá los datos de los listados de propiedades y los imprimirá en la consola.
+2. El script abrirá un navegador navegará a la URL especificada, extraerá los datos de los listados de propiedades y los imprimirá en la consola. Si `headless` está configurado como `True` no se mostrará la ventana del navegador, si se configura como `False` se podrá ver el navegador en acción. 
 
 ## Descripción de los scripts
 
@@ -65,8 +65,5 @@ Este es el script principal que:
 
 ## Notas
 
-- Actualmente, el scraper solo extrae los resultados de la primera página. La implementación de la paginación está pendiente.
-- Si `headless` está configurado como `False`, el pop-up de cookies no se cierra automáticamente y debe hacerse manualmente.
-- Actualmente sólo imprime la información en la consola. La implementación de la escritura en un archivo CSV está pendiente.
 
 

@@ -1,16 +1,33 @@
 from web_scraper import WebScraper
+import time
+import csv
 
 if __name__ == "__main__":
     # Se puede cambiar el headless a False para ver el navegador en acción
-    # TODO: Con headless en false de momento el popup de cookies no se cierra automáticamente, hay que hacerlo manualmente
-    scraper = WebScraper(headless=True)
+    scraper = WebScraper(headless=False)
 
     # URL de ejemplo. En el futuro incorporaremos la busqueda por parametros con la clase Sitemap
     url = "https://www.pisos.com/viviendas/madrid/"
     scraper.navegar_a_listado(url)
     
-    # Extraer los datos del listado
-    propiedades = scraper.extraer_datos_listado()
+    aux = 0
+    first_page = True
+    while aux < 4: # Modificar este número en función de las páginas que se quieran scrapear
+        print('Estoy analizando la página: ', aux)
+
+        # Extraer los datos del listado
+        propiedades = scraper.extraer_datos_listado()
+
+        # Cerrar un pop up que sale a veces
+        scraper.pulsar_cerrar_popup()
+        time.sleep(3)
+
+        # Avanzar a la siguiente página
+        scraper.avanzar_pagina(first_page)
+        first_page = False
+        time.sleep(3)
+
+        aux+=1
     
     # Cerrar el navegador
     scraper.cerrar()
@@ -21,3 +38,19 @@ if __name__ == "__main__":
         print(f"\nPropiedad {i}:")
         for key, value in propiedad.items():
             print(f"{key}: {value}")
+
+    # Ruta donde se guardará el archivo CSV
+    archivo_csv = "dataset/dataset.csv"
+
+    # Escribir los datos en el archivo CSV
+    with open(archivo_csv, mode='w', newline='', encoding='utf-8') as file:
+        # Crear un escritor CSV que utiliza los diccionarios como entrada
+        escritor_csv = csv.DictWriter(file, fieldnames=["Precio", "Título", "Ubicación", "Habitaciones", "Baños", "Metros Cuadrados"])
+        
+        # Escribir los encabezados (las claves del diccionario)
+        escritor_csv.writeheader()
+        
+        # Escribir los datos de las propiedades
+        escritor_csv.writerows(propiedades)
+
+    print(f"Datos guardados en {archivo_csv}")

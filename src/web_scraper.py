@@ -20,11 +20,26 @@ class WebScraper:
         service = Service(driver_path)
         self.driver = webdriver.Chrome(service=service, options=options)
 
+    def cerrar_cookies(self):
+        try:
+            # Localizar el botón de "Aceptar y cerrar", para cerrar el pop up de Cookies
+            boton_aceptar_cookies = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.XPATH, '//span[contains(text(), "Aceptar y cerrar")]'))
+            )
+            
+            # Hacer clic en el botón de aceptar cookies
+            boton_aceptar_cookies.click()
+            
+            print("Ventana de cookies cerrada.")
+        except Exception as e:
+            print("No se pudo encontrar el botón de cookies o ya estaba cerrado")
 
     def navegar_a_listado(self, url):
         # Abre la URL del listado
         self.driver.get(url)
         
+        self.cerrar_cookies()
+
         # Espera hasta que el botón "Ver resultados" esté disponible y haz clic
         try:
             boton_ver_resultados = WebDriverWait(self.driver, 10).until(
@@ -81,6 +96,40 @@ class WebScraper:
                 print(f"Error al extraer datos de una propiedad: {e}")
 
         return datos_propiedades
+
+    def pulsar_cerrar_popup(self):
+        try:
+            # Esperar hasta que el botón con clase 'modal__close' sea clickeable
+            boton_cerrar_modal = WebDriverWait(self.driver, 10).until(
+                EC.element_to_be_clickable((By.CSS_SELECTOR, 'button.modal__close'))
+            )
+            
+            # Hacer clic en el botón de cerrar modal
+            boton_cerrar_modal.click()
+            print("Botón 'Cerrar' clickeado correctamente.")
+            
+        except Exception as e:
+            print("No se pudo hacer clic en el botón 'Cerrar'")
+
+    def avanzar_pagina(self, first_page):
+        try:
+            if first_page:
+                # Usar el XPath para seleccionar el div o el enlace dentro del div
+                siguiente_boton = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, '//div[@class="pagination__next single"]//a'))
+                )
+            else:
+                siguiente_boton = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, '//div[@class="pagination__next border-l"]//a'))
+                )
+
+            # Hacer clic en el botón "Siguiente"
+            siguiente_boton.click()
+            print("Botón 'Siguiente' clickeado correctamente.")
+
+        except Exception as e:
+            print("No se pudo hacer clic en el botón 'Siguiente'")
+
 
     def cerrar(self):
         # Cerrar el navegador
