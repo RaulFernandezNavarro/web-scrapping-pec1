@@ -45,7 +45,7 @@ if __name__ == "__main__":
     # Escribir los datos en el archivo CSV
     with open(archivo_csv, mode='w', newline='', encoding='utf-8') as file:
         # Crear un escritor CSV que utiliza los diccionarios como entrada
-        escritor_csv = csv.DictWriter(file, fieldnames=["Precio", "Título", "Ubicación", "Habitaciones", "Baños", "Planta", "Antigüedad", "Gastos de comunidad", "Referencia"])
+        escritor_csv = csv.DictWriter(file, fieldnames=["Precio", "Título", "Ubicación", "Superficie", "Habitaciones", "Baños", "Planta", "Antigüedad", "Gastos de comunidad", "Referencia"])
         
         # Escribir los encabezados (las claves del diccionario)
         escritor_csv.writeheader()
