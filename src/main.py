@@ -12,11 +12,11 @@ if __name__ == "__main__":
     
     aux = 0
     first_page = True
-    while aux < 4: # Modificar este número en función de las páginas que se quieran scrapear
+    while aux < 1: # Modificar este número en función de las páginas que se quieran scrapear
         print('Estoy analizando la página: ', aux)
 
         # Extraer los datos del listado
-        propiedades = scraper.extraer_datos_listado()
+        propiedades = scraper.extraer_datos_piso()
 
         # Cerrar un pop up que sale a veces
         scraper.pulsar_cerrar_popup()
@@ -45,7 +45,7 @@ if __name__ == "__main__":
     # Escribir los datos en el archivo CSV
     with open(archivo_csv, mode='w', newline='', encoding='utf-8') as file:
         # Crear un escritor CSV que utiliza los diccionarios como entrada
-        escritor_csv = csv.DictWriter(file, fieldnames=["Precio", "Título", "Ubicación", "Habitaciones", "Baños", "Metros Cuadrados"])
+        escritor_csv = csv.DictWriter(file, fieldnames=["Precio", "Título", "Ubicación", "Habitaciones", "Baños", "Planta", "Antigüedad", "Gastos de comunidad", "Referencia"])
         
         # Escribir los encabezados (las claves del diccionario)
         escritor_csv.writeheader()

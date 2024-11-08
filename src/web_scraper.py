@@ -5,6 +5,7 @@ from selenium.webdriver.support import expected_conditions as EC
 from bs4 import BeautifulSoup
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
+import time, sys
 
 class WebScraper:
     def __init__(self, headless=True):
@@ -96,7 +97,118 @@ class WebScraper:
                 print(f"Error al extraer datos de una propiedad: {e}")
 
         return datos_propiedades
+    
+    def extraer_datos_piso(self):
+        # Espera a que cargue al menos un elemento de propiedad 'ad-preview'
+        WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CLASS_NAME, "ad-preview"))
+        )
 
+        # Obtén el HTML de la página de resultados
+        soup = BeautifulSoup(self.driver.page_source, 'html.parser')
+        
+        # Encuentra todos los elementos de propiedades directamente
+        pisos = soup.find_all('div', class_='ad-preview')
+
+        # Lista para almacenar los datos de cada propiedad
+        datos_propiedades = []
+
+        # Extrae la información de cada propiedad
+        for piso in pisos:
+            # Obtenemos el link a la página del anuncio del piso
+            link = piso.find('a')['href']
+
+            # Abrir el enlace en una nueva pestaña
+            self.driver.execute_script(f"window.open('{link}', '_blank');")
+            time.sleep(2)  # Esperar brevemente a que la pestaña se abra
+
+            # Cambiar a la nueva pestaña (la última abierta)
+            self.driver.switch_to.window(self.driver.window_handles[-1])
+
+            # Obtén el HTML de la página del piso
+            soup1 = BeautifulSoup(self.driver.page_source, 'html.parser')
+
+            # Precio
+            precio = soup1.find('div', class_='price__value jsPriceValue').get_text(strip=True)
+
+            # Título y ubicación
+            details_block = soup1.find_all('div', class_='details__block')
+            for item in details_block:
+                if item and len(item['class']) == 1:
+                    titulo = item.find('h1').text if item.find('h1') else None
+                    print(titulo)
+                    ubicacion = item.find('p').text if item.find('p') else None
+                    print(ubicacion)
+                    break
+
+            try:
+                # Esperar hasta que el botón con clase 'Ver todas las características' sea clickeable
+                boton_ver_caracteristicas = WebDriverWait(self.driver, 10).until(
+                    EC.element_to_be_clickable((By.XPATH, '//span[contains(text(), "Ver todas las características")]'))
+                )
+                
+                # Hacer clic en el botón de 'Ver todas las características'
+                boton_ver_caracteristicas.click()
+                print("Botón 'Ver todas las características' clickeado correctamente.")
+                 
+                # Obtén el HTML de la página del piso
+                soup2 = BeautifulSoup(self.driver.page_source, 'html.parser')
+
+                # Superficie construida
+                superficie_label = soup2.find('span', class_='features__label', text="Superficie construida: ")
+                superficie_valor = superficie_label.find_next_sibling('span', class_='features__value').text
+                
+                
+                # Habitaciones
+                habitaciones_label = soup2.find('span', class_='features__label', text="Habitaciones: ")
+                habitaciones_valor = habitaciones_label.find_next_sibling('span', class_='features__value').text
+
+                # Baños
+                baños_label = soup2.find('span', class_='features__label', text="Baños: ")
+                baños_valor = baños_label.find_next_sibling('span', class_='features__value').text
+
+                # Planta
+                planta_label = soup2.find('span', class_='features__label', text="Planta: ")
+                planta_valor = planta_label.find_next_sibling('span', class_='features__value').text
+
+                # Antigüedad
+                antiguedad_label = soup2.find('span', class_='features__label', text="Antigüedad: ")
+                antiguedad_valor = antiguedad_label.find_next_sibling('span', class_='features__value').text
+
+                # Gastos de comunidad
+                gastos_label = soup2.find('span', class_='features__label', text="Gastos de comunidad: ")
+                gastos_valor = gastos_label.find_next_sibling('span', class_='features__value').text
+
+                # Referencia
+                referencia_label = soup2.find('span', class_='features__label', text="Referencia: ")
+                referencia_valor = referencia_label.find_next_sibling('span', class_='features__value').text  
+
+                # Agregar los datos a la lista
+                datos_propiedades.append({
+                    "Precio": precio,
+                    "Título": titulo,
+                    "Ubicación": ubicacion,
+                    "Superficie": superficie_valor,
+                    "Habitaciones": habitaciones_valor,
+                    "Baños": baños_valor,
+                    "Planta": planta_valor,
+                    "Antigüedad": antiguedad_valor,
+                    "Gastos de comunidad": gastos_valor,
+                    "Referencia": referencia_valor,
+                })
+
+            except Exception as e:
+                print(f"Error al extraer datos de una propiedad: {e}") 
+
+            # Cerrar la pestaña actual (la nueva)
+            self.driver.close()
+
+            # Volver a la pestaña original (la página de inicio)
+            self.driver.switch_to.window(self.driver.window_handles[0])
+
+            time.sleep(2)
+
+        return datos_propiedades
     def pulsar_cerrar_popup(self):
         try:
             # Esperar hasta que el botón con clase 'modal__close' sea clickeable
